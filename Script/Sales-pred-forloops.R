@@ -1,6 +1,7 @@
 install.packages("pacman")
 pacman:: p_load(caret, reshape, ggplot2, dplyr)
 
+#Creating data train and test sets
 
 set.seed(100)
 in_training <- createDataPartition(trainSet$Volume, p = 0.75, list = F)
@@ -11,6 +12,9 @@ test <- testSet[-in_training,]
 a <- c("lm", "rf","knn", "svmLinear", "svmRadial")
 
 compare_model <- c()
+
+
+#Loop for methods
 
 for(i in a) {
   
@@ -36,9 +40,13 @@ ggplot(compare_model_melt, aes(x=model, y=value))+
   geom_col()+
   facet_grid(metric~., scales="free")
 
+
+# Loop for features
+
 a <- c("Volume ~ PositiveServRev + x4star", "Volume ~ x4star + x2star", "Volume ~ PositiveServRev")
 
 compare_var <- c()
+
 
 for ( i in a) {
   
@@ -64,6 +72,8 @@ ggplot(compare_var_melt, aes(x=model, y=value))+
   geom_col()+
   facet_grid(metric~., scales="free")
 
+
+# Loop for variables and methods
 
 a <- c("Volume ~ x4star + x2star", "Volume ~ x2star + PositiveServRev", "Volume ~ x4star")
 b <- c("rf", "svmLinear")
@@ -104,3 +114,31 @@ compare_var_mod_melt
 ggplot(compare_var_mod_melt, aes(x=model, y=value))+
   geom_col()+
   facet_grid(metric~., scales="free")
+
+
+# Final model
+
+RF_ok<- train(Volume~ x4star, data = train,
+                 method= "rf", trControl=fitControl2)
+
+RF_ok_predictions <- predict(RF_ok,test)
+RF_ok_predictions
+postResample(pred = RF_ok_predictions,obs = test$Volume)
+test$RF_ok_predictions <- RF_ok_predictions
+
+# Predictions
+
+Pred_def <- predict(RF_ok,ready_new_prod)
+Pred_def
+ready_new_prod$Volume_ok <- Pred_def
+ready_new_prod
+write.csv(ready_new_prod, file="../Data/newproductattributes2017_afterpredloop", row.names = TRUE)
+
+newprod$Volume_ok <- Pred_def
+
+ggplot(newprod, aes(ProductType, 
+                    Volume_ok)) + geom_area(aes(colour=factor(ProductType))) + theme(text = element_text(size=10), 
+                                                                                       axis.text.x = element_text(angle=90, hjust=1))
+
+
+
