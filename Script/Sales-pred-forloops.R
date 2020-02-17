@@ -132,7 +132,7 @@ Pred_def <- predict(RF_ok,ready_new_prod)
 Pred_def
 ready_new_prod$Volume_ok <- Pred_def
 ready_new_prod
-write.csv(ready_new_prod, file="../Data/newproductattributes2017_afterpredloop", row.names = TRUE)
+write.csv(ready_new_prod, file="../Data/newproductattributes2017_afterpredloop.csv", row.names = TRUE)
 
 newprod$Volume_ok <- Pred_def
 
