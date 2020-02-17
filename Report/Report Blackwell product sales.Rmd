@@ -1,0 +1,322 @@
+---
+title: "Blackwell’s product mix"
+author: "Isabel de Miguel"
+date: "17/02/2020"
+output:
+  html_document: 
+    code_folding: hide
+---
+
+### Predicting product sales and the impact of customers and service reviews
+
+
+<center>
+
+![](/Users/isabeldemiguel/Downloads/how-ratings-reviews-affect-aso.png){Width="400"}
+
+</center>
+
+### Background
+
+Blackwell’s sales department is planning to add new products to the company’s product mix, for that reason, they have requested to us to predict potential product sales of these new products, concretely **PC, Laptops, Netbooks and Smartphones** based on the historical sales of existing products.
+
+<center>
+
+![Historical sales of existing product mix](/Users/isabeldemiguel/Desktop/Ubiqum/Módulo 2/Task 3/Plots/Rplot_volumeprod.png)
+
+</center>
+
+We'll analyse every attribute given to see which one is relevant for our prediction, in other words, which variable is specially affecting to volume sales, but they has asked to us to pay special attention on **services and customer reviews**.
+
+
+### Highlights
+
+- We have a small database, with **only 80 rows of sales performance tracking**. It allows us to make predictions with certain precision, but **the small sample doesn’t let to them to be representative to the reality**.
+
+- Concerning the products required for the analysis, we can conclude with the information available that none of the 4 requested products are the ones which more volume sales have, neither the more profitability provide: **Tablet and Game Console are the top 2 in terms of volume and profit**.
+
+<center>
+
+![Prediction of Volume by product type](/Users/isabeldemiguel/Desktop/Ubiqum/Módulo 2/Task 3/Plots/Rplot_finok.png)
+
+
+</center>
+
+- Specifically, these are the predictions:
+
+  - **PC could obtain 615 sales, giving a profit of around 107K$.**
+  
+  - **Netbook could reach more slaes (1141)**, but less proft than the previous one, **36K$ aprox.**
+  
+  - **Followed by Laptop: 195 product sales and 33K$ profit.**
+  
+  - Finally, the less profit would be given by **Smartphone, with more sales (1114), but considerably less profit (16K$ aprox)**.
+
+- Lastly, regarding **customers and service reviews**, we have seen throught different steps of pre-processing (while analizing correlation), feature selection and modelling (thanks to the varImp function), that, in general, they have a relevant influence on the Volume predictions, so **they have an important correlation**.
+
+<center>
+
+![Correlation between variables](/Users/isabeldemiguel/Desktop/Ubiqum/Módulo 2/Task 3/Plots/Rplot_corr_ok2.png)
+
+</center>
+
+### Data and methodology
+
+-	Two data sets: **existing products and new products attributes**.
+
+     - Existing products: 80 rows, 18 columns.
+     - New products: 25 rows, 18 columns.
+
+
+-	Response variable: **Volume**.
+
+-	Regresion problem, worked in R.
+
+-	Algorithms: **lm, SVM, KNN, Random Forest** to predict sales of four product types from the new products list.
+
+
+### Importing and exploring data
+
+On the very first step, after installing libraries we upload both data sets and make an initial exploration just to familiarize ourselves with the data:
+
+```{r existing products exploration, results='hide', eval= FALSE, warning=FALSE, message=FALSE}
+
+# Importing data
+existingprod <- read_csv("~/Desktop/Ubiqum/Módulo 2/Task 3/Data/existingproductattributes2017.csv")
+newprod <- read_csv("~/Desktop/Ubiqum/Módulo 2/Task 3/Data/newproductattributes2017.csv")
+
+# Data exploration 1
+summary(existingprod)
+plot(existingprod$Volume)
+qqnorm(existingprod$Volume)
+boxplot(existingprod$Volume)
+```
+
+
+### Preprocessing
+
+We clearly see that preprocessing is needed:
+
+- We are dealing with a regression problem, in which the response is a numerical variable, and also are most of the predictors execpt "Product Type", so we need to **convert this factor into a binary feature** that contain ‘0’ and ‘1’ classes.
+
+- **Two outliers on the dependent variable** are very obvious, we must remove them.
+
+<center>
+
+![Volume outliers](/Users/isabeldemiguel/Desktop/Ubiqum/Módulo 2/Task 3/Plots/Rplot_out.png)
+![Volume outliers](/Users/isabeldemiguel/Desktop/Ubiqum/Módulo 2/Task 3/Plots/Rplot_out2.png)
+
+</center>
+
+```{r preprocessing, results='hide', eval= FALSE, warning=FALSE, message=FALSE}
+
+# Preprocessing 1 # Dummify the data
+newDataFrame <- dummyVars(" ~ .", data = existingprod)
+ready_exist_prod <- data.frame(predict(newDataFrame, newdata = existingprod))
+
+DataFrame_NP <- dummyVars(" ~ .", data = newprod)
+ready_new_prod <- data.frame(predict(DataFrame_NP, newdata = newprod))
+
+# Data exploration 2
+str(ready_exist_prod)
+sum(is.na(ready_exist_prod))
+ggdensity(exist_prod_ok$Volume)
+
+# NA´s
+ready_exist_prod$BestSellersRank <- NULL
+names(ready_exist_prod)<-c("Accessories","Display","ExtWarranty",
+                        "GameConsole","Laptop","Netbook","PC","Printer","PrintSupplies",
+                        "Smartphone","Software","Tablet","ProdID","Price","x5star","x4star",
+                        "x3star","x2star","x1star","PositiveServRev","NegServRev",
+                        "RecomProd","ShipWeight","ProdDepth","ProdWidth","ProdHeight",
+                        "ProfMargin","Volume")
+names(ready_exist_prod)
+
+ready_new_prod$BestSellersRank <- NULL
+names(ready_new_prod)<-c("Accessories","Display","ExtWarranty",
+                         "GameConsole","Laptop","Netbook","PC","Printer",
+                         "PrintSupplies","Smartphone","Software","Tablet","ProdID","Price",
+                         "x5star","x4star","x3star","x2star","x1star","PositiveServRev",
+                         "NegServRev","RecomProd","ShipWeight","ProdDepth",
+                         "ProdWidth","ProdHeight","ProfMargin","Volume")
+names(ready_new_prod)
+
+# Outliers
+boxplot(ready_exist_prod$Volume)$out
+outliers <- boxplot(ready_exist_prod$Volume)$out
+ready_exist_prod[which(ready_exist_prod$Volume %in% outliers),]
+exist_prod_ok <- ready_exist_prod[-which(ready_exist_prod$Volume %in% outliers),]
+boxplot(exist_prod_ok$Volume)
+
+boxplot(exist_prod_ok$PositiveServRev)
+outliers2 <- boxplot(exist_prod_ok$PositiveServRev)$out
+exist_prod_ok[which(exist_prod_ok$PositiveServRev %in% outliers2),]
+exist_prod_ok2 <- exist_prod_ok[-which(exist_prod_ok$PositiveServRev %in% outliers2),]
+qqplot(exist_prod_ok2$PositiveServRev, exist_prod_ok2$Volume)
+densityplot(exist_prod_ok2$PositiveServRev)
+boxplot(exist_prod_ok2$PositiveServRev)
+histogram(exist_prod_ok2$PositiveServRev)
+
+```
+
+<center>
+
+![Volume Distribution after removing outliers](/Users/isabeldemiguel/Desktop/Ubiqum/Módulo 2/Task 3/Plots/Rplot05.png)
+
+</center>
+
+- We also find one attribute with some **NA's in one column: Best Seller Rank**. So we decide to delete it.
+
+### Feature selection
+
+With our dataframe transformed, we are now going to study the **relationship between different features** and see how are they related to each other and with the response. In this case:
+
+- As we said at the begining of the report, there is a strong correlation between **customers and services reviews and Volume**.
+
+- The perfect correlation between Volume and **5 stars** reviews could produce unreal predictions, based only in this predictor and cause **overfitting**, so we have to remove it.
+
+- Althought the correlation of the rest of the reviews with the response is hight, we also see that it exists **collinearity between those predictors**, so to avoid two or more variables predict the same and make noise, we'll remove the ones with less correlation:
+
+     - Between 4 and 3, we take 3 stars.
+     - Between 2 and 1, we take 1 stars.
+     
+ 
+- Now, focusing on the different **product types**, we can not appreciate correlation, but it is difficult to analyze with the correlation matrix, as it take values to see correlations, and every product type has **binary ones**, so it's not determinant. Will see on next steps if the models take them to predict or not.
+
+While correlation doesn't always imply causation between the relevant independent variables and the dependent variable we are know ready to next step.
+
+```{r correlation, results='hide', eval= FALSE, warning=FALSE, message=FALSE}
+
+# Data exploration 3
+corr2 <- cor(exist_prod_ok2)
+corr2
+corrplot(corr2, tl.cex = 0.5)
+cor(exist_prod_ok2, exist_prod_ok2$Volume)
+
+```
+
+### Running models
+
+After prepare our **training and testing sets**, we'll run 4 different models to see which one performs best **without overfitting**.
+For each one, we start modelling with **every variable and out of the box**, and as we obtain different learnings about the importance of the variables and the parameters settings, we continue working **selecting features and optimizing the algorithms**.
+
+**The script bellow only shows the best feature selection and parameters settings of each model. Every step of the process to get there could be seen on the code upload to github*
+
+```{r running models, results='hide', eval= FALSE, warning=FALSE, message=FALSE}
+
+# Testing and Training Sets
+set.seed(123)
+trainSize<-round(nrow(exist_prod_ok2)*0.75)
+testSize<-nrow(exist_prod_ok2)-trainSize
+training_indices<-sample(seq_len(nrow(exist_prod_ok2)),size =trainSize)
+trainSet<-exist_prod_ok2[training_indices,]
+testSet<-exist_prod_ok2[-training_indices,]
+
+# Cross validation
+fitControl1 <- trainControl(method = "repeatedcv", number = 10, repeats = 1)
+fitControl2 <- trainControl(method = "loocv")
+
+
+# Linear regression, feature selection:
+Model2feat<-lm(Volume~ x4star+x2star+PositiveServRev+NegServRev, trainSet, trControl=fitControl1)
+summary(Model1)
+# Testing 
+lm2feat_predictions <- predict(Model2feat,testSet)
+lm2feat_predictions
+#Metrics and errors
+postResample(pred = lm2feat_predictions,obs = testSet$Volume)
+# Predictions with model selected: the simplest & less errors (lm2feat)
+Pred_lm2feat <- predict(Model2feat,ready_new_prod)
+Pred_lm2feat
+
+
+# SVM 4
+SVM4 <- train(Volume~ x4star+x2star+PositiveServRev+NegServRev, trainSet, 
+              method = "svmLinear", trControl = fitControl1)  
+summary(SVM4)
+# Testing
+SVM4_predictions <- predict(SVM4,testSet)
+SVM4_predictions
+#Metrics and errors 
+postResample(pred = SVM4_predictions,obs = testSet$Volume) # Best SVM model
+#Predictions SVM4 (best library and metrics, without features overfitting or collinearity)
+Finalpred <- predict(SVM4,ready_new_prod)
+Finalpred
+
+
+# Model KNN2
+ModelKNN2 <- train(Volume~., trainSet[,c(-1,-2,-3,-4.-5,-6,-7,-8,-9,-10,-11,-12,-13,-15)],
+                   method = "kknn", trControl=fitControl1)
+summary(ModelKNN2)
+# Testing KNN2
+KNN2_predictions <- predict(ModelKNN2,testSet)
+KNN2_predictions
+#Metrics and errors
+postResample(pred = KNN2_predictions,obs = testSet$Volume)
+#Predictions KNN2 (best metrics and feature selection)
+Finalpred <- predict(ModelKNN2,ready_new_prod)
+Finalpred
+
+
+# Model RF4
+ModelRF4<- train(Volume~ ., trainSet[,c(-1,-2,-3,-4,-5,-6,-7,-8,-9,-10,-11,-12,-13,-15,-17)],
+                 method= "rf", trControl=fitControl2)
+summary(ModelRF4)
+# Testing RF
+RF4_predictions <- predict(ModelRF4,testSet)
+RF4_predictions
+#Metrics and errors
+postResample(pred = RF4_predictions,obs = testSet$Volume)
+testSet$RF4_predictions <- RF4_predictions
+errors3 <- (testSet$RF4_predictions-testSet$Volume)
+errors3
+ggdensity(errors3)
+#Predictions
+Finalpred <- predict(ModelRF4,ready_new_prod)
+Finalpred
+ready_new_prod$Volumepred <- Finalpred
+ready_new_prod
+write.csv(ready_new_prod, file="../Data/newproductattributes2017_afterpred.csv", row.names = TRUE)
+
+str(newprod)
+newprod$Volumen_PT <- Finalpred
+ggplot(newprod, aes(ProductType, 
+                    Volumen_PT)) + geom_point(aes(colour=factor(ProductType))) + theme(text = element_text(size=10), 
+                                                                                       axis.text.x = element_text(angle=90, hjust=1))
+
+
+```
+
+
+### Metrics and errors
+
+On the script above can be seen the metrics of each model. **RF give us the best results, with a RMSE of 160.43 and Rsquared of 0.93**. We have selected this model with this characteristics:
+
+- Feature selection
+
+    - Removing features that cause overfitting and noise.
+    
+    - Including features related to the response (given by the correlation matrix and the varImp functions while running models).
+    
+- Metrics and errors
+
+    - Tested with postresample and fitting control parameters in order to assure that the metrics obtained are good and also reliable.
+    
+    - With an error close to zero.
+
+<center>
+
+![](/Users/isabeldemiguel/Desktop/Ubiqum/Módulo 2/Task 3/Plots/Rplot10.png)
+
+</center>
+
+As we mentioned at the begining of the report, we have obtained predictions based on a model that have a **great fit, but no consistent with the reality due to the non representative data sample**.
+
+
+
+### ***THANK YOU!***
+
+
+
+
+
