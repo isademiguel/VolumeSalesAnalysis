@@ -14,6 +14,7 @@ postResample(pred = lm2_predictions,obs = testSet$Volume) # Negative values
 
 # Model lm, feature selection:
 Model2feat<-lm(Volume~ x4star+x2star+PositiveServRev+NegServRev, trainSet, trControl=fitControl1)
+# Model1 does not exist
 summary(Model1)
 # Testing 
 lm2feat_predictions <- predict(Model2feat,testSet)
@@ -23,7 +24,7 @@ postResample(pred = lm2feat_predictions,obs = testSet$Volume)
 testSet$lm2feat_predictions <- lm2feat_predictions
 errors_a <- (testSet$lm2feat_predictions-testSet$Volume)
 errors_a
-ggdensity(errors_a)
+ggdensity(errors_a) # <- here we see clear  outliers, you can try to see which row, anf maybe understand whats happen
 
 
 # Model linear regression including products
