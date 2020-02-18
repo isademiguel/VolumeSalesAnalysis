@@ -9,7 +9,7 @@ fitControl2 <- trainControl(method = "LOOCV")
 # Model RF3
 ModelRF3<- train(Volume~ ., trainSet[,c(-15)], method= "rf", trControl=fitControl2)
 summary(ModelRF3)
-varImp(ModelRF3)
+varImp(ModelRF3) # This varImp does not work
 # Testing 
 RF3_predictions <- predict(ModelRF3,testSet)
 RF3_predictions
@@ -43,9 +43,10 @@ ggdensity(errors3)
 
 # Model RF5
 ModelRF5<- train(Volume~ PositiveServRev+x4star+x2star, data = trainSet,
-                 method= "rf", trControl=fitControl2)
+                 method= "rf", trControl=fitControl2, importance=T)
 summary(ModelRF5)
-varImp(ModelRF5)
+varImp(ModelRF5) # Does not work neither
+# In the train() statement, you need to specify the option importance=T
 # Testing
 RF5_predictions <- predict(ModelRF5,testSet)
 RF5_predictions

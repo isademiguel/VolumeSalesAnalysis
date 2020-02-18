@@ -1,3 +1,6 @@
+#### VAL ####
+# The code run with only one minor error, "new_prod_ok" does not exist
+
 library(readr)
 library(caret)
 library(ggplot2)
@@ -12,6 +15,9 @@ existingprod <- read_csv("../Data/existingproductattributes2017.csv")
 newprod <- read_csv("../Data/newproductattributes2017_original.csv")
 
 # Data exploration 1
+
+# No boxplot for outliers ?
+
 summary(existingprod)
 plot(existingprod$Volume)
 qqnorm(existingprod$Volume)
@@ -42,6 +48,18 @@ sum(is.na(ready_exist_prod))
 ggdensity(exist_prod_ok$Volume)
 
 # Preprocessing 2 # NA´s
+
+# Where do you see if there is NA's ?
+# Exemple of loop to see how many NA's by column ->
+for(c in 1:ncol(ready_exist_prod)) {
+  nas <- sum(is.na(ready_exist_prod[,c]))
+  if(nas > 1) {
+    print(paste(colnames(ready_exist_prod[c]), "has", nas, "NA's"))
+  } else {
+    print(paste(colnames(ready_exist_prod[c]), "Does not have NA's"))
+  }
+}
+
 ready_exist_prod$BestSellersRank <- NULL
 names(ready_exist_prod)<-c("Accessories","Display","ExtWarranty",
                         "GameConsole","Laptop","Netbook","PC","Printer","PrintSupplies",
@@ -68,6 +86,7 @@ exist_prod_ok <- ready_exist_prod[-which(ready_exist_prod$Volume %in% outliers),
 boxplot(exist_prod_ok$Volume)
 names(exist_prod_ok)
 sum (is.na(exist_prod_ok))
+# The following line does not work
 names(new_prod_ok)
 boxplot(exist_prod_ok$PositiveServRev)
 outliers2 <- boxplot(exist_prod_ok$PositiveServRev)$out

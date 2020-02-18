@@ -4,7 +4,7 @@ library(e1071)
 SVM1<-svm(Volume~ ., trainSet[,c(-13,-15)]) # Without product ID (no meaning) and 5 stars (overfitting)
 summary(SVM1)
 # Testing 
-SVM1_predictions <- predict(SVM1,testSet)
+SVM1_predictions <- predict(SVM1,testSet) # Something wrong here...
 SVM1_predictions
 #Metrics and errors 
 postResample(pred = SVM1_predictions,obs = testSet$Volume) # Bad metrics
