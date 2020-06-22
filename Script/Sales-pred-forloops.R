@@ -3,8 +3,8 @@ pacman:: p_load(caret, reshape, ggplot2, dplyr)
 
 #Creating data train and test sets
 
-set.seed(100)
-in_training <- createDataPartition(trainSet$Volume, p = 0.75, list = F)
+set.seed(123)
+in_training <- createDataPartition(trainSet$Volume, p = 0.80, list = F)
 
 train <- trainSet[in_training,]
 test <- testSet[-in_training,]
@@ -14,7 +14,7 @@ a <- c("lm", "rf","knn", "svmLinear", "svmRadial")
 compare_model <- c()
 
 
-#Loop for methods
+# Loop for methods
 
 for(i in a) {
   
@@ -43,7 +43,7 @@ ggplot(compare_model_melt, aes(x=model, y=value))+
 
 # Loop for features
 
-a <- c("Volume ~ PositiveServRev + x4star", "Volume ~ x4star + x2star", "Volume ~ PositiveServRev")
+a <- c("Volume ~ NegServRev + x4star", "Volume ~ x4star + x2star", "Volume ~ PositiveServRev + x2star", "Volume ~ PositiveServRev + x4star + x2star")
 
 compare_var <- c()
 
@@ -75,8 +75,8 @@ ggplot(compare_var_melt, aes(x=model, y=value))+
 
 # Loop for variables and methods
 
-a <- c("Volume ~ x4star + x2star", "Volume ~ x2star + PositiveServRev", "Volume ~ x4star")
-b <- c("rf", "svmLinear")
+a <- c("Volume ~ x2star + PositiveServRev", "Volume ~ x2star + PositiveServRev + x4star")
+b <- c("rf", "lm")
 compare_var_mod <- c()
 
 for ( i in a) {
@@ -118,7 +118,7 @@ ggplot(compare_var_mod_melt, aes(x=model, y=value))+
 
 # Final model
 
-RF_ok<- train(Volume~ x4star, data = train,
+RF_ok<- train(Volume~ x4star + x2star + PositiveServRev, data = train,
                  method= "rf", trControl=fitControl2)
 
 RF_ok_predictions <- predict(RF_ok,test)
