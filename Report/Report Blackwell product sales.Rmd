@@ -1,5 +1,5 @@
 ---
-title: "Blackwell’s product mix"
+title: "Product mix analysis"
 author: "Isabel de Miguel"
 date: "17/02/2020"
 output:
@@ -18,11 +18,11 @@ output:
 
 ### Background
 
-Blackwell’s sales department is planning to add new products to the company’s product mix, for that reason, they have requested to us to predict potential product sales of these new products, concretely **PC, Laptops, Netbooks and Smartphones** based on the historical sales of existing products.
+The sales department of a company is planning to add new products to the its product mix, for that reason, they have requested to us to predict potential product sales of these new products, concretely **PC, Laptops, Netbooks and Smartphones** based on the historical sales of existing products.
 
 <center>
 
-![Historical sales of existing product mix](/Users/isabeldemiguel/Desktop/Ubiqum/Módulo 2/Task 3/Plots/Rplot_volumeprod.png)
+![Historical sales of existing product mix](/Users/isabeldemiguel/Desktop/Ubiqum/Módulo 2/Task 3/Plots/Rplot_volumeprod.png)
 
 </center>
 
@@ -37,7 +37,7 @@ We'll analyse every attribute given to see which one is relevant for our predict
 
 <center>
 
-![Prediction of Volume by product type](/Users/isabeldemiguel/Desktop/Ubiqum/Módulo 2/Task 3/Plots/Rplot_finok.png)
+![Prediction of Volume by product type](/Users/isabeldemiguel/Desktop/Ubiqum/Módulo 2/Task 3/Plots/Rplot_finok.png)
 
 
 </center>
@@ -56,7 +56,7 @@ We'll analyse every attribute given to see which one is relevant for our predict
 
 <center>
 
-![Correlation between variables](/Users/isabeldemiguel/Desktop/Ubiqum/Módulo 2/Task 3/Plots/Rplot_corr_ok2.png)
+![Correlation between variables](/Users/isabeldemiguel/Desktop/Ubiqum/Módulo 2/Task 3/Plots/Rplot_corr_ok2.png)
 
 </center>
 
@@ -77,13 +77,13 @@ We'll analyse every attribute given to see which one is relevant for our predict
 
 ### Importing and exploring data
 
-On the very first step, after installing libraries we upload both data sets and make an initial exploration just to familiarize ourselves with the data:
+On the very first step we upload both data sets and make an initial exploration just to familiarize ourselves with the data:
 
 ```{r existing products exploration, results='hide', eval= FALSE, warning=FALSE, message=FALSE}
 
 # Importing data
-existingprod <- read_csv("~/Desktop/Ubiqum/Módulo 2/Task 3/Data/existingproductattributes2017.csv")
-newprod <- read_csv("~/Desktop/Ubiqum/Módulo 2/Task 3/Data/newproductattributes2017.csv")
+existingprod <- read_csv("~/Desktop/Ubiqum/Módulo 2/Task 3/Data/existingproductattributes2017.csv")
+newprod <- read_csv("~/Desktop/Ubiqum/Módulo 2/Task 3/Data/newproductattributes2017.csv")
 
 # Data exploration 1
 summary(existingprod)
@@ -103,8 +103,8 @@ We clearly see that preprocessing is needed:
 
 <center>
 
-![Volume outliers](/Users/isabeldemiguel/Desktop/Ubiqum/Módulo 2/Task 3/Plots/Rplot_out.png)
-![Volume outliers](/Users/isabeldemiguel/Desktop/Ubiqum/Módulo 2/Task 3/Plots/Rplot_out2.png)
+![Volume outliers](/Users/isabeldemiguel/Desktop/Ubiqum/Módulo 2/Task 3/Plots/Rplot_out.png)
+![Volume outliers](/Users/isabeldemiguel/Desktop/Ubiqum/Módulo 2/Task 3/Plots/Rplot_out2.png)
 
 </center>
 
@@ -161,7 +161,7 @@ histogram(exist_prod_ok2$PositiveServRev)
 
 <center>
 
-![Volume Distribution after removing outliers](/Users/isabeldemiguel/Desktop/Ubiqum/Módulo 2/Task 3/Plots/Rplot05.png)
+![Volume Distribution after removing outliers](/Users/isabeldemiguel/Desktop/Ubiqum/Módulo 2/Task 3/Plots/Rplot05.png)
 
 </center>
 
@@ -200,7 +200,7 @@ cor(exist_prod_ok2, exist_prod_ok2$Volume)
 After prepare our **training and testing sets**, we'll run 4 different models to see which one performs best **without overfitting**.
 For each one, we start modelling with **every variable and out of the box**, and as we obtain different learnings about the importance of the variables and the parameters settings, we continue working **selecting features and optimizing the algorithms**.
 
-**The script bellow only shows the best feature selection and parameters settings of each model. Every step of the process to get there could be seen on the code upload to github*
+**The script bellow only shows the best feature selection and parameters settings of each model. Every step of the process to get there is showed on the code upload to github*
 
 ```{r running models, results='hide', eval= FALSE, warning=FALSE, message=FALSE}
 
@@ -306,7 +306,7 @@ On the script above can be seen the metrics of each model. **RF give us the best
 
 <center>
 
-![](/Users/isabeldemiguel/Desktop/Ubiqum/Módulo 2/Task 3/Plots/Rplot10.png)
+![](/Users/isabeldemiguel/Desktop/Ubiqum/Módulo 2/Task 3/Plots/Rplot10.png)
 
 </center>
 
